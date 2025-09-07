@@ -29,6 +29,7 @@ namespace ReservadeBoletos
             
             txtNombre.Clear();
             txtDUI.Clear();
+            txtCantidadBoletos.Clear();
             cmbCategoria.SelectedIndex = -1;
             cmbPelicula.Items.Clear();
             cmbPelicula.SelectedIndex = -1;
@@ -65,16 +66,32 @@ namespace ReservadeBoletos
                 return;
             }
 
-            dgvReservas.Rows.Add(txtNombre.Text, txtDUI.Text, cmbCategoria.Text, cmbPelicula.Text, DateTime.Now.ToString("dd/MM/yyyy HH:mm"));
+            if (string.IsNullOrWhiteSpace(txtCantidadBoletos.Text) || !int.TryParse(txtCantidadBoletos.Text, out int cantidad) || cantidad < 1)
+            {
+                MessageBox.Show("Debe ingresar una cantidad válida de boletos (mínimo 1).", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtCantidadBoletos.Focus();
+                return;
+            }
 
-            txtNombre.Clear();
-            txtDUI.Clear();
-            cmbCategoria.SelectedIndex = -1;
-            cmbPelicula.Items.Clear();
-            cmbPelicula.SelectedIndex = -1;
-            btnAgregar.Enabled = false;
-            
-            MessageBox.Show("Reserva agregada exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            try
+            {
+                dgvReservas.Rows.Add(txtNombre.Text, txtDUI.Text, cmbCategoria.Text, cmbPelicula.Text, txtCantidadBoletos.Text);
+                dgvReservas.Refresh();
+                
+                txtNombre.Clear();
+                txtDUI.Clear();
+                txtCantidadBoletos.Clear();
+                cmbCategoria.SelectedIndex = -1;
+                cmbPelicula.Items.Clear();
+                cmbPelicula.SelectedIndex = -1;
+                btnAgregar.Enabled = true;
+                
+                MessageBox.Show("Reserva agregada exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al agregar la reserva: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void cmbCategoria_SelectedIndexChanged(object sender, EventArgs e)
@@ -150,12 +167,25 @@ namespace ReservadeBoletos
             }
         }
 
+        private void txtCantidadBoletos_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsDigit(e.KeyChar) && e.KeyChar != (char)Keys.Back)
+            {
+                e.Handled = true;
+            }
+        }
+
         private void txtNombre_TextChanged(object sender, EventArgs e)
         {
             ValidarCampos();
         }
 
         private void txtDUI_TextChanged(object sender, EventArgs e)
+        {
+            ValidarCampos();
+        }
+
+        private void txtCantidadBoletos_TextChanged(object sender, EventArgs e)
         {
             ValidarCampos();
         }
@@ -170,6 +200,9 @@ namespace ReservadeBoletos
             bool camposValidos = !string.IsNullOrWhiteSpace(txtNombre.Text) &&
                                 !string.IsNullOrWhiteSpace(txtDUI.Text) &&
                                 txtDUI.Text.Length == 10 &&
+                                !string.IsNullOrWhiteSpace(txtCantidadBoletos.Text) &&
+                                int.TryParse(txtCantidadBoletos.Text, out int cantidad) &&
+                                cantidad >= 1 &&
                                 cmbCategoria.SelectedIndex != -1 &&
                                 cmbPelicula.SelectedIndex != -1;
 
@@ -177,3 +210,5 @@ namespace ReservadeBoletos
         }
     }
 }
+//AutoEValuacion: 10
+//Carlos Manuel Hernandz Rodriguez+
